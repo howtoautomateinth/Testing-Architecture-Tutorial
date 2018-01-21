@@ -1,0 +1,15 @@
+version: "3"
+services:
+  gitlab:
+    image: gitlab/gitlab-ce
+    ports:
+      - "30080:80"
+      - "30022:22"
+    volumes:
+      - "${DATA_DIR}/config:/etc/gitlab"
+      - "${DATA_DIR}/logs:/var/log/gitlab"
+      - "${DATA_DIR}/data:/var/opt/gitlab"
+    restart: always
+    hostname: gitlab.howtoautomate.in.th
+    environment:
+      - GITLAB_OMNIBUS_CONFIG="external_url 'http://gitlab.howtoautomate.in.th:30080'; gitlab_rails['gitlab_shell_ssh_port']=30022;"
