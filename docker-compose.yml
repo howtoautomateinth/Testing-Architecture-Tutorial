@@ -1,11 +1,13 @@
 version: "3"
 services:
+
   gitlab:
     image: gitlab/gitlab-ce
     ports:
       - "30080:80"
       - "30022:22"
     volumes:
+      # read variable from .env file
       - "${DATA_DIR}/config:/etc/gitlab"
       - "${DATA_DIR}/logs:/var/log/gitlab"
       - "${DATA_DIR}/data:/var/opt/gitlab"
@@ -13,3 +15,27 @@ services:
     hostname: gitlab.howtoautomate.in.th
     environment:
       - GITLAB_OMNIBUS_CONFIG="external_url 'http://gitlab.howtoautomate.in.th:30080'; gitlab_rails['gitlab_shell_ssh_port']=30022;"
+  
+  teamcity:
+    image: jetbrains/teamcity-server
+    ports:
+      # host port is 38111 but teamcity container port is 8111
+      - "38111:8111"
+    volumes:
+      - "${TEAMCITY_DATA_DIR}/datadir:/data/teamcity_server/datadir"
+      - "${TEAMCITY_DATA_DIR}/logs:/opt/teamcity/logs"
+    depends_on:
+      # depend on gitlab start but not ready
+      - gitlab
+
+  teamcity_agent_instance:
+    image: jetbrains/teamcity-agent
+    volumes:
+      - "${TEAMCITY_AGENT_DATA_DIR}/conf:/data/teamcity_agent/conf"
+    environment:
+      # bind with internal port of teamcity server
+      # bind by service name
+      - SERVER_URL=teamcity:8111
+    depends_on:
+      # depend on teamcity start but not depend on ready
+      - teamcity
