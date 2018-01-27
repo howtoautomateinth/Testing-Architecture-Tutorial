@@ -8,9 +8,9 @@ services:
       - "30022:22"
     volumes:
       # read variable from .env file
-      - "${DATA_DIR}/config:/etc/gitlab"
-      - "${DATA_DIR}/logs:/var/log/gitlab"
-      - "${DATA_DIR}/data:/var/opt/gitlab"
+      - "${GITLAB_DATA_DIR}/config:/etc/gitlab"
+      - "${GITLAB_DATA_DIR}/logs:/var/log/gitlab"
+      - "${GITLAB_DATA_DIR}/data:/var/opt/gitlab"
     restart: always
     hostname: gitlab.howtoautomate.in.th
     environment:

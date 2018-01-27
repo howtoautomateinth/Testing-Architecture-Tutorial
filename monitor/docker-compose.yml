@@ -1,0 +1,37 @@
+version: "3"
+services:
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "30000:3000"
+    volumes:
+      - "${GRAFANA_DATA_DIR}:/var/lib/grafana"
+    restart: always
+    networks:
+      - monitor
+    depends_on:
+      - influxdb
+      - chronograf
+
+  influxdb:
+    image: influxdb
+    ports:
+      - "38086:8086"
+    volumes:
+      - "${INFLUXDB_DATA_DIR}:/var/lib/influxdb"
+    networks:
+      - monitor
+
+  chronograf:
+    image: chronograf
+    ports:
+      - "38888:8888"
+    command: --influxdb-url=http://influxdb:8086
+    networks:
+      - monitor
+    depends_on:
+      - influxdb
+
+networks:
+  monitor:
