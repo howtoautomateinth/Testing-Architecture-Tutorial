@@ -3,6 +3,7 @@ services:
 
   grafana:
     image: grafana/grafana
+    container_name: grafana
     ports:
       - "30000:3000"
     volumes:
@@ -15,6 +16,7 @@ services:
       - chronograf
 
   influxdb:
+    container_name: influxdb
     image: influxdb
     ports:
       - "38086:8086"
@@ -24,6 +26,7 @@ services:
       - monitor
 
   chronograf:
+    container_name: chronograf
     image: chronograf
     ports:
       - "38888:8888"

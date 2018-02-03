@@ -2,22 +2,27 @@ version: "3"
 services:
 
   gitlab:
-    image: gitlab/gitlab-ce
+    container_name: gitlab-server
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.howtoautomate.in.th'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.howtoautomate.in.th'
+        # Add any other gitlab.rb configuration here, each on its own line
     ports:
-      - "30080:80"
-      - "30022:22"
+      - '30080:80'
+      - '30443:443'
+      - '30022:22'
     volumes:
       # read variable from .env file
       - "${GITLAB_DATA_DIR}/config:/etc/gitlab"
       - "${GITLAB_DATA_DIR}/logs:/var/log/gitlab"
       - "${GITLAB_DATA_DIR}/data:/var/opt/gitlab"
-    restart: always
-    hostname: gitlab.howtoautomate.in.th
-    environment:
-      - GITLAB_OMNIBUS_CONFIG="external_url 'http://gitlab.howtoautomate.in.th:30080'; gitlab_rails['gitlab_shell_ssh_port']=30022;"
-  
+
   teamcity:
-    image: jetbrains/teamcity-server
+    container_name: teamcity-server
+    image: jetbrains/teamcity-server:latest
     ports:
       # host port is 38111 but teamcity container port is 8111
       - "38111:8111"
@@ -29,7 +34,8 @@ services:
       - gitlab
 
   teamcity_agent_instance:
-    image: jetbrains/teamcity-agent
+    container_name: teamcity-agent
+    image: jetbrains/teamcity-agent:latest
     volumes:
       - "${TEAMCITY_AGENT_DATA_DIR}/conf:/data/teamcity_agent/conf"
     environment:
