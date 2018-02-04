@@ -3,22 +3,56 @@ services:
 
   gitlab:
     container_name: gitlab-server
-    image: 'gitlab/gitlab-ce:latest'
+    image: 'sameersbn/gitlab:10.4.2-1'
     restart: always
     hostname: 'gitlab.howtoautomate.in.th'
     environment:
-      GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.howtoautomate.in.th'
-        # Add any other gitlab.rb configuration here, each on its own line
+      # gitlab configuration
+      - 'GITLAB_PORT=30080'
+      - 'GITLAB_SSH_PORT=30022'
+      - 'GITLAB_HOST=localhost'
+      - 'GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alpha-numeric-string'
+      - 'GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alpha-numeric-string'
+      - 'GITLAB_SECRETS_OTP_KEY_BASE=long-and-random-alpha-numeric-string'
+      # link to postgresql container
+      - 'DB_ADAPTER=postgresql'
+      - 'DB_HOST=gitlab-postgresql'
+      - 'DB_PORT=5432'
+      - 'DB_USER=gitlab'
+      - 'DB_PASS=password'
+      # link to redis container
+      - 'REDIS_HOST=gitlab-redis'
+      - 'REDIS_PORT=6379'
     ports:
       - '30080:80'
       - '30443:443'
       - '30022:22'
     volumes:
       # read variable from .env file
-      - "${GITLAB_DATA_DIR}/config:/etc/gitlab"
-      - "${GITLAB_DATA_DIR}/logs:/var/log/gitlab"
-      - "${GITLAB_DATA_DIR}/data:/var/opt/gitlab"
+      - "${GITLAB_DATA_DIR}/gitlab:/home/git/data"
+    depends_on:
+      # prerequisite container
+      - gitlab_postgresql
+      - gitlab_redis
+
+  gitlab_postgresql:
+    container_name: gitlab-postgresql
+    image: sameersbn/postgresql:9.6-2
+    restart: always
+    environment:
+      - 'DB_NAME=gitlabhq_production'
+      - 'DB_USER=gitlab'
+      - 'DB_PASS=password'
+      - 'DB_EXTENSION=pg_trgm'
+    volumes:
+      - "${GITLAB_DATA_DIR}/postgresql:/var/lib/postgresql"
+
+  gitlab_redis:
+    container_name: gitlab-redis
+    image: sameersbn/redis:latest
+    restart: always
+    volumes:
+      - "${GITLAB_DATA_DIR}/redis:/var/lib/redis"
 
   teamcity:
     container_name: teamcity-server
